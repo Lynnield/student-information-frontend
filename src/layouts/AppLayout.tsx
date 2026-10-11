@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 import { useAuth } from '../hooks/useAuth'
 import type { UserRole } from '../types/api'
 import { ROLE_LABELS } from '../utils/roles'
@@ -61,6 +62,7 @@ function isVisible(item: NavItem, role: UserRole): boolean {
 
 export function AppLayout() {
   const { user, logout } = useAuth()
+  const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [logoutError, setLogoutError] = useState<string | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -167,7 +169,9 @@ export function AppLayout() {
         ) : null}
 
         <main className="flex-1 p-4 lg:p-6">
-          <Outlet />
+          <ErrorBoundary key={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

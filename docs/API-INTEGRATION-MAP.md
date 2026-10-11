@@ -167,7 +167,7 @@ How the student is determined:
 - **Student role** — the frontend calls `GET /students?search={own email}` and picks the row whose `email` matches the logged-in user, then requests that student's academic record.
 - **Administrator / Registrar / Instructor** — the user picks a student from the `GET /students` list.
 
-The backend response already contains `student` (with `program`) and `academic_record` (enrollments with course, term, instructor, and grade), so the UI renders it directly.
+The backend response contains `student` (summary with `full_name` and `program`), `terms` (each with its courses, grades, unit totals, and `term_weighted_average`), and `summary` (totals and `general_weighted_average`). The UI renders one table per term plus summary cards. Types live in `src/types/academicRecord.ts`.
 
 ## 12. Profile / Account
 

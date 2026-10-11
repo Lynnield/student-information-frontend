@@ -185,7 +185,7 @@ export function AcademicRecordPage() {
         <>
           <div className="rounded-lg border border-slate-200 bg-white p-5">
             <h2 className="text-base font-semibold text-slate-900">
-              {record.student.last_name}, {record.student.first_name}
+              {record.student.full_name}
             </h2>
             <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
               <div>
@@ -217,93 +217,116 @@ export function AcademicRecordPage() {
             </dl>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white">
-            {record.academic_record.length === 0 ? (
-              <p className="p-6 text-sm text-slate-600">
-                No enrollment records found for this student.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Term
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Course
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Section
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Instructor
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Enrolled
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Status
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Midterm
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Final
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Rating
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-600">
-                        Remarks
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {record.academic_record.map((enrollment) => (
-                      <tr key={enrollment.id}>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.course_offering?.academic_term
-                            ? `${enrollment.course_offering.academic_term.semester} ${enrollment.course_offering.academic_term.academic_year}`
-                            : '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.course_offering?.course
-                            ? `${enrollment.course_offering.course.course_code} — ${enrollment.course_offering.course.course_title}`
-                            : '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.course_offering?.section ?? '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.course_offering?.instructor?.name ??
-                            '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.enrollment_date?.slice(0, 10) ?? '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.status}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.grade?.midterm_grade ?? '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.grade?.final_grade ?? '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.grade?.final_rating ?? '—'}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {enrollment.grade?.remarks ?? '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['Terms', record.summary.total_terms],
+              ['Courses', record.summary.total_courses],
+              [
+                'Units (graded / total)',
+                `${record.summary.graded_units} / ${record.summary.total_units}`,
+              ],
+              [
+                'General weighted average',
+                record.summary.general_weighted_average ?? '—',
+              ],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="rounded-lg border border-slate-200 bg-white p-4"
+              >
+                <dt className="text-slate-500">{label}</dt>
+                <dd className="mt-1 text-lg font-semibold text-slate-900">
+                  {value}
+                </dd>
               </div>
-            )}
-          </div>
+            ))}
+          </dl>
+
+          {record.terms.length === 0 ? (
+            <p className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600">
+              No enrollment records found for this student.
+            </p>
+          ) : (
+            record.terms.map((term) => (
+              <section
+                key={term.academic_term_id}
+                className="rounded-lg border border-slate-200 bg-white"
+                aria-label={`${term.semester} ${term.academic_year}`}
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 px-4 py-3">
+                  <h3 className="text-sm font-semibold text-slate-900">
+                    {term.semester} · {term.academic_year}
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    {term.total_courses} course(s) · {term.total_units} unit(s)
+                    · Term average: {term.term_weighted_average ?? '—'}
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        {[
+                          'Course',
+                          'Units',
+                          'Section',
+                          'Instructor',
+                          'Status',
+                          'Midterm',
+                          'Final',
+                          'Rating',
+                          'Remarks',
+                        ].map((header) => (
+                          <th
+                            key={header}
+                            className="px-4 py-2 text-left font-medium text-slate-600"
+                          >
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {term.courses.map((course) => (
+                        <tr key={course.enrollment_id}>
+                          <td className="px-4 py-2 text-slate-900">
+                            <span className="font-mono text-xs">
+                              {course.course_code}
+                            </span>{' '}
+                            — {course.course_title}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.units}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.section ?? '—'}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.instructor ?? '—'}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.enrollment_status}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.midterm_grade ?? '—'}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.final_grade ?? '—'}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.final_rating ?? '—'}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {course.remarks ?? '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            ))
+          )}
         </>
       ) : null}
     </div>
