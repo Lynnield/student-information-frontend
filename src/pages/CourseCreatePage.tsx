@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { CourseForm } from '../features/courses/CourseForm'
 import { createCourse } from '../services/courseService'
 import type { CoursePayload } from '../types/course'
+import { useToast } from '../components/Toast'
 
 export function CourseCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(payload: CoursePayload) {
@@ -13,6 +15,7 @@ export function CourseCreatePage() {
 
     try {
       const created = await createCourse(payload)
+      toast.success('Course created.')
       navigate(`/courses/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

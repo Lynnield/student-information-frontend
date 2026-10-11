@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { ProgramForm } from '../features/programs/ProgramForm'
 import { getProgram, updateProgram } from '../services/programService'
 import type { Program, ProgramPayload } from '../types/program'
 import { ApiRequestError } from '../utils/apiError'
+import { useToast } from '../components/Toast'
 
 export function ProgramEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const toast = useToast()
   const [program, setProgram] = useState<Program | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<ApiRequestError | null>(null)
@@ -57,6 +59,7 @@ export function ProgramEditPage() {
 
     try {
       const updated = await updateProgram(id, payload)
+      toast.success('Program updated.')
       navigate(`/programs/${updated.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -74,7 +77,7 @@ export function ProgramEditPage() {
   if (loadError) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the program">{loadError.message}</Alert>
+        <ErrorState error={loadError} title="Could not load the program" />
         <Link
           to="/programs"
           className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"

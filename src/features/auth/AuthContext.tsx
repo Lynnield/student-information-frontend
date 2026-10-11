@@ -25,6 +25,9 @@ interface AuthContextValue {
   user: AuthUser | null
   isAuthenticated: boolean
   isInitializing: boolean
+  // Set when the session could not be restored because the API was unreachable.
+  sessionError: ApiRequestError | null
+  retrySession: () => void
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
@@ -34,6 +37,16 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [sessionError, setSessionError] = useState<ApiRequestError | null>(
+    null,
+  )
+  const [restoreKey, setRestoreKey] = useState(0)
+
+  const retrySession = useCallback(() => {
+    setSessionError(null)
+    setIsInitializing(true)
+    setRestoreKey((key) => key + 1)
+  }, [])
 
   const clearSession = useCallback(() => {
     clearAccessToken()
@@ -71,12 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        if (
-          error instanceof ApiRequestError &&
-          (error.status === 401 || error.isNetworkError)
-        ) {
+        if (error instanceof ApiRequestError) {
           if (error.status === 401) {
             clearSession()
+          } else if (error.isNetworkError || (error.status ?? 0) >= 500) {
+            // Keep the token: the session may still be valid once the API is back.
+            setSessionError(error)
           }
         }
       })
@@ -89,12 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [clearSession])
+  }, [clearSession, restoreKey])
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await loginRequest({ email, password })
     setAccessToken(data.token)
     const currentUser = await getCurrentUser()
+    setSessionError(null)
     setUser(currentUser)
   }, [])
 
@@ -119,10 +133,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isAuthenticated: user !== null,
       isInitializing,
+      sessionError,
+      retrySession,
       login,
       logout,
     }),
-    [user, isInitializing, login, logout],
+    [user, isInitializing, sessionError, retrySession, login, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

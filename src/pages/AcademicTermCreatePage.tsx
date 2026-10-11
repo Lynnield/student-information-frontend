@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AcademicTermForm } from '../features/academicTerms/AcademicTermForm'
 import { createAcademicTerm } from '../services/academicTermService'
 import type { AcademicTermPayload } from '../types/academicTerm'
+import { useToast } from '../components/Toast'
 
 export function AcademicTermCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(payload: AcademicTermPayload) {
@@ -13,6 +15,7 @@ export function AcademicTermCreatePage() {
 
     try {
       const created = await createAcademicTerm(payload)
+      toast.success('Academic term created.')
       navigate(`/academic-terms/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { CourseForm } from '../features/courses/CourseForm'
 import { getCourse, updateCourse } from '../services/courseService'
 import type { Course, CoursePayload } from '../types/course'
 import { ApiRequestError } from '../utils/apiError'
+import { useToast } from '../components/Toast'
 
 export function CourseEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const toast = useToast()
   const [course, setCourse] = useState<Course | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<ApiRequestError | null>(null)
@@ -57,6 +59,7 @@ export function CourseEditPage() {
 
     try {
       const updated = await updateCourse(id, payload)
+      toast.success('Course updated.')
       navigate(`/courses/${updated.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -74,7 +77,7 @@ export function CourseEditPage() {
   if (loadError) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the course">{loadError.message}</Alert>
+        <ErrorState error={loadError} title="Could not load the course" />
         <Link
           to="/courses"
           className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"

@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ProgramForm } from '../features/programs/ProgramForm'
 import { createProgram } from '../services/programService'
 import type { ProgramPayload } from '../types/program'
+import { useToast } from '../components/Toast'
 
 export function ProgramCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(payload: ProgramPayload) {
@@ -13,6 +15,7 @@ export function ProgramCreatePage() {
 
     try {
       const created = await createProgram(payload)
+      toast.success('Program created.')
       navigate(`/programs/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

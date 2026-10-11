@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { StudentForm } from '../features/students/StudentForm'
 import { listAllPrograms } from '../services/programService'
@@ -11,10 +11,12 @@ import type {
   StudentPayload,
 } from '../types/student'
 import { ApiRequestError } from '../utils/apiError'
+import { useToast } from '../components/Toast'
 
 export function StudentEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const toast = useToast()
   const [student, setStudent] = useState<Student | null>(null)
   const [programs, setPrograms] = useState<ProgramRef[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -64,6 +66,7 @@ export function StudentEditPage() {
 
     try {
       const updated = await updateStudent(id, payload)
+      toast.success('Student updated.')
       navigate(`/students/${updated.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -81,7 +84,7 @@ export function StudentEditPage() {
   if (loadError) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the student">{loadError.message}</Alert>
+        <ErrorState error={loadError} title="Could not load the student" />
         <Link
           to="/students"
           className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"

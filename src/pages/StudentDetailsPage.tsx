@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { getStudent } from '../services/studentService'
 import type { Student } from '../types/student'
@@ -60,7 +60,7 @@ export function StudentDetailsPage() {
   if (error) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the student">{error.message}</Alert>
+        <ErrorState error={error} title="Could not load the student" />
         <div className="flex gap-2">
           <button
             type="button"

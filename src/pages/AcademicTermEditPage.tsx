@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { AcademicTermForm } from '../features/academicTerms/AcademicTermForm'
 import {
@@ -12,10 +12,12 @@ import type {
   AcademicTermPayload,
 } from '../types/academicTerm'
 import { ApiRequestError } from '../utils/apiError'
+import { useToast } from '../components/Toast'
 
 export function AcademicTermEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const toast = useToast()
   const [term, setTerm] = useState<AcademicTerm | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<ApiRequestError | null>(null)
@@ -63,6 +65,7 @@ export function AcademicTermEditPage() {
 
     try {
       const updated = await updateAcademicTerm(id, payload)
+      toast.success('Academic term updated.')
       navigate(`/academic-terms/${updated.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -80,9 +83,7 @@ export function AcademicTermEditPage() {
   if (loadError) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the academic term">
-          {loadError.message}
-        </Alert>
+        <ErrorState error={loadError} title="Could not load the academic term" />
         <Link
           to="/academic-terms"
           className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"

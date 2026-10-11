@@ -6,9 +6,11 @@ import { CourseOfferingForm } from '../features/courseOfferings/CourseOfferingFo
 import { useOfferingFormOptions } from '../features/courseOfferings/useOfferingFormOptions'
 import { createCourseOffering } from '../services/courseOfferingService'
 import type { CourseOfferingPayload } from '../types/courseOffering'
+import { useToast } from '../components/Toast'
 
 export function CourseOfferingCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const { courses, academicTerms, instructors, isLoading, error } =
     useOfferingFormOptions()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -18,6 +20,7 @@ export function CourseOfferingCreatePage() {
 
     try {
       const created = await createCourseOffering(payload)
+      toast.success('Course offering created.')
       navigate(`/course-offerings/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

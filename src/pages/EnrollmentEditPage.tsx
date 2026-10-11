@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { EnrollmentForm } from '../features/enrollments/EnrollmentForm'
 import { useEnrollmentFormOptions } from '../features/enrollments/useEnrollmentFormOptions'
@@ -10,10 +11,12 @@ import {
 } from '../services/enrollmentService'
 import type { Enrollment, EnrollmentPayload } from '../types/enrollment'
 import { ApiRequestError } from '../utils/apiError'
+import { useToast } from '../components/Toast'
 
 export function EnrollmentEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const toast = useToast()
   const { students, courseOfferings, isLoading: optionsLoading, error: optionsError } =
     useEnrollmentFormOptions()
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
@@ -63,6 +66,7 @@ export function EnrollmentEditPage() {
 
     try {
       const updated = await updateEnrollment(id, payload)
+      toast.success('Enrollment updated.')
       navigate(`/enrollments/${updated.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -80,9 +84,11 @@ export function EnrollmentEditPage() {
   if (loadError || optionsError) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the enrollment">
-          {loadError?.message ?? optionsError}
-        </Alert>
+        {loadError ? (
+          <ErrorState error={loadError} title="Could not load the enrollment" />
+        ) : (
+          <Alert title="Could not load the enrollment">{optionsError}</Alert>
+        )}
         <Link
           to="/enrollments"
           className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"

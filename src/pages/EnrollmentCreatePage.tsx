@@ -6,9 +6,11 @@ import { EnrollmentForm } from '../features/enrollments/EnrollmentForm'
 import { useEnrollmentFormOptions } from '../features/enrollments/useEnrollmentFormOptions'
 import { createEnrollment } from '../services/enrollmentService'
 import type { EnrollmentPayload } from '../types/enrollment'
+import { useToast } from '../components/Toast'
 
 export function EnrollmentCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const { students, courseOfferings, isLoading, error } =
     useEnrollmentFormOptions()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -18,6 +20,7 @@ export function EnrollmentCreatePage() {
 
     try {
       const created = await createEnrollment(payload)
+      toast.success('Enrollment created.')
       navigate(`/enrollments/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

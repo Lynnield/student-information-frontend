@@ -117,11 +117,12 @@ List endpoints are consumed with their real query parameters: `search`, `status`
 All responses pass through a centralized Axios client and are normalized into an `ApiRequestError`:
 
 - **401** — token cleared, user redirected to `/login`
-- **403** — permission message shown (e.g. wrong role or viewing another student's record)
-- **404** — not-found message with retry/back options
+- **403** — "Access denied (403)" state with the server's message (e.g. wrong role or viewing another student's record)
+- **404** — "Not found (404)" state with back options; unknown URLs show a dedicated 404 page
 - **409** — business conflicts shown directly (duplicate student email/number, duplicate enrollment, enrollment with a grade, program/course/term with related records)
 - **422** — validation messages mapped to form fields where possible; also used for invalid login credentials
-- **500 / network failure** — friendly "cannot reach the server" message with retry
+- **500 / network failure** — friendly "cannot reach the server" message with retry; if the API is down when the app loads, a "Server unreachable" screen with Retry is shown instead of logging the user out
+- **Success** — create, update, and delete actions show a non-blocking toast notification
 
 ## 14. Testing
 

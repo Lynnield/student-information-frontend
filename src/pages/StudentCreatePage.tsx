@@ -6,9 +6,11 @@ import { StudentForm } from '../features/students/StudentForm'
 import { listAllPrograms } from '../services/programService'
 import { createStudent } from '../services/studentService'
 import type { ProgramRef, StudentPayload } from '../types/student'
+import { useToast } from '../components/Toast'
 
 export function StudentCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [programs, setPrograms] = useState<ProgramRef[]>([])
   const [isLoadingPrograms, setIsLoadingPrograms] = useState(true)
   const [programsError, setProgramsError] = useState<string | null>(null)
@@ -28,6 +30,7 @@ export function StudentCreatePage() {
 
     try {
       const created = await createStudent(payload)
+      toast.success('Student created.')
       navigate(`/students/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

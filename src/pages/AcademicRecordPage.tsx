@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { useAuth } from '../hooks/useAuth'
 import { getAcademicRecord } from '../services/academicRecordService'
@@ -165,9 +165,7 @@ export function AcademicRecordPage() {
 
       {error ? (
         <div className="space-y-3">
-          <Alert title="Could not load the academic record">
-            {error.message}
-          </Alert>
+          <ErrorState error={error} title="Could not load the academic record" />
           <button
             type="button"
             onClick={() => {

@@ -6,9 +6,11 @@ import { GradeForm } from '../features/grades/GradeForm'
 import { useGradeFormOptions } from '../features/grades/useGradeFormOptions'
 import { createGrade } from '../services/gradeService'
 import type { GradePayload } from '../types/grade'
+import { useToast } from '../components/Toast'
 
 export function GradeCreatePage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const { enrollments, isLoading, error } = useGradeFormOptions()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -17,6 +19,7 @@ export function GradeCreatePage() {
 
     try {
       const created = await createGrade(payload)
+      toast.success('Grade created.')
       navigate(`/grades/${created.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
 import { CourseOfferingForm } from '../features/courseOfferings/CourseOfferingForm'
 import { useOfferingFormOptions } from '../features/courseOfferings/useOfferingFormOptions'
@@ -13,10 +14,12 @@ import type {
   CourseOfferingPayload,
 } from '../types/courseOffering'
 import { ApiRequestError } from '../utils/apiError'
+import { useToast } from '../components/Toast'
 
 export function CourseOfferingEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const toast = useToast()
   const { courses, academicTerms, instructors, isLoading: optionsLoading, error: optionsError } =
     useOfferingFormOptions()
   const [offering, setOffering] = useState<CourseOffering | null>(null)
@@ -66,6 +69,7 @@ export function CourseOfferingEditPage() {
 
     try {
       const updated = await updateCourseOffering(id, payload)
+      toast.success('Course offering updated.')
       navigate(`/course-offerings/${updated.id}`, { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -83,9 +87,11 @@ export function CourseOfferingEditPage() {
   if (loadError || optionsError) {
     return (
       <div className="space-y-3">
-        <Alert title="Could not load the course offering">
-          {loadError?.message ?? optionsError}
-        </Alert>
+        {loadError ? (
+          <ErrorState error={loadError} title="Could not load the course offering" />
+        ) : (
+          <Alert title="Could not load the course offering">{optionsError}</Alert>
+        )}
         <Link
           to="/course-offerings"
           className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert } from '../components/Alert'
+import { ErrorState } from '../components/ErrorState'
 import { Spinner } from '../components/Spinner'
+import { useToast } from '../components/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { listAllPrograms } from '../services/programService'
 import { deleteStudent, listStudents } from '../services/studentService'
@@ -28,6 +30,7 @@ const STATUS_OPTIONS = ['active', 'inactive', 'graduated', 'dropped'] as const
 
 export function StudentsPage() {
   const { user } = useAuth()
+  const toast = useToast()
   const canManage = user ? canManageStudents(user.role) : false
 
   const [students, setStudents] = useState<Paginated<Student> | null>(null)
@@ -118,6 +121,7 @@ export function StudentsPage() {
 
     try {
       await deleteStudent(id)
+      toast.success('Student deleted.')
       setConfirmingDeleteId(null)
       setReloadKey((key) => key + 1)
     } catch (err) {
@@ -238,7 +242,7 @@ export function StudentsPage() {
           </div>
         ) : error ? (
           <div className="space-y-3 p-6">
-            <Alert title="Could not load students">{error.message}</Alert>
+            <ErrorState error={error} title="Could not load students" />
             <button
               type="button"
               onClick={() => setReloadKey((key) => key + 1)}

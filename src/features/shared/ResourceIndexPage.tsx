@@ -1,7 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert } from '../../components/Alert'
+import { ErrorState } from '../../components/ErrorState'
 import { Spinner } from '../../components/Spinner'
+import { useToast } from '../../components/Toast'
 import type { Paginated } from '../../types/student'
 import { ApiRequestError } from '../../utils/apiError'
 
@@ -73,6 +75,7 @@ export function ResourceIndexPage<T extends { id: number }>({
   const allowCreate = canCreate ?? canManage
   const allowUpdate = canUpdate ?? canManage
   const allowDelete = canDelete ?? canManage
+  const toast = useToast()
   const [result, setResult] = useState<Paginated<T> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<ApiRequestError | null>(null)
@@ -148,6 +151,7 @@ export function ResourceIndexPage<T extends { id: number }>({
 
     try {
       await remove(id)
+      toast.success('Record deleted.')
       setConfirmingDeleteId(null)
       setReloadKey((key) => key + 1)
     } catch (err) {
@@ -252,9 +256,7 @@ export function ResourceIndexPage<T extends { id: number }>({
           </div>
         ) : error ? (
           <div className="space-y-3 p-6">
-            <Alert title={`Could not load ${title.toLowerCase()}`}>
-              {error.message}
-            </Alert>
+            <ErrorState error={error} title={`Could not load ${title.toLowerCase()}`} />
             <button
               type="button"
               onClick={() => setReloadKey((key) => key + 1)}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Alert } from '../../components/Alert'
+import { ErrorState } from '../../components/ErrorState'
 import { Spinner } from '../../components/Spinner'
 import { ApiRequestError } from '../../utils/apiError'
 
@@ -73,9 +73,7 @@ export function ResourceDetailsPage<T>({
   if (error) {
     return (
       <div className="space-y-3">
-        <Alert title={`Could not load the ${title.toLowerCase()}`}>
-          {error.message}
-        </Alert>
+        <ErrorState error={error} title={`Could not load the ${title.toLowerCase()}`} />
         <div className="flex gap-2">
           <button
             type="button"
