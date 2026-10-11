@@ -38,6 +38,16 @@ export function parseApiError(error: unknown): ApiRequestError {
     const status = error.response.status
     const data = error.response.data as ValidationErrorBody | undefined
     const fieldErrors = data?.errors ?? {}
+
+    // 500-class bodies can contain internal details (SQL, stack traces in
+    // debug mode), so never show them to the user.
+    if (status >= 500) {
+      return new ApiRequestError(
+        'The server encountered an error. Please try again later.',
+        status,
+      )
+    }
+
     const message =
       data?.message ||
       (status === 401
@@ -48,9 +58,7 @@ export function parseApiError(error: unknown): ApiRequestError {
             ? 'The requested record was not found.'
             : status === 409
               ? 'This request conflicts with existing data.'
-              : status >= 500
-                ? 'The server encountered an error. Please try again later.'
-                : 'The request could not be completed.')
+              : 'The request could not be completed.')
 
     return new ApiRequestError(message, status, fieldErrors)
   }
